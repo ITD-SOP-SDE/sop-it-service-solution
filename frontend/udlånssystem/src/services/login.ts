@@ -2,7 +2,6 @@ import { useContext, useEffect } from "react";
 
 import { CurrentUserContext } from "@/App";
 import axios from "axios";
-import { toast } from "sonner";
 
 export const validateSession = async () => {
   try {
@@ -45,26 +44,25 @@ export function useLoginViaSession() {
   return { loginViaSession };
 }
 
-export async function loginViaCredentials(username: string, password: string) {
-  let output = { status: 500, message: "Server error", user: undefined };
-  await axios
-    .post("auth/login", { username, password })
-    .then((res) => {
-      output.message = res.data;
-      if (res.data.moderatorLevel == 0) {
-        output.status = 403;
-        return output;
-      }
+interface LoginResult {
+  status: number;
+  user?: userState;
+}
 
-      if (res.data?.username) {
-        output.user = res.data;
-        output.status = 200;
-      }
-    })
-    .catch((err) => {
-      toast.error(`Ukendt fejl! Kunne ikke kontakte serveren. ${err}`);
-    });
-  return output;
+export async function loginViaCredentials(
+  username: string,
+  password: string,
+): Promise<LoginResult> {
+  try {
+    const { data } = await axios.post("auth/login", { username, password });
+
+    if (data?.moderatorLevel == 0) return { status: 403 };
+    if (data?.username) return { status: 200, user: data };
+
+    return { status: 500 };
+  } catch (err: any) {
+    return { status: err?.response?.status ?? 0 };
+  }
 }
 export function logout(
   setCurrentUser: React.Dispatch<React.SetStateAction<userState>>,
