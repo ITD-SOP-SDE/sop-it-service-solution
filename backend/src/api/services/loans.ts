@@ -23,13 +23,15 @@ export async function createOne(values: ILoanCreateInput): Promise<IResponse> {
     personel_password
   );
 
-  if (!authenticate) return { status: 401 };
+  if (!authenticate)
+    return { status: 401, data: { error: "Invalid credentials" } };
 
   const helpdesk_personel = await prisma.users.findFirst({
     where: { username: personel_username },
   });
 
-  if (!helpdesk_personel) return { status: 401 };
+  if (!helpdesk_personel)
+    return { status: 403, data: { error: "Personel not registered" } };
 
   loan.helpdesk_personel_id = helpdesk_personel.UUID;
 
@@ -55,12 +57,12 @@ export async function createOne(values: ILoanCreateInput): Promise<IResponse> {
   if (!ldapUser) return { status: 404, data: { success: false } };
 
   let userEmail_var = user?.username + "@edu.sde.dk";
-  
+
   let final_userEmail_var = userEmail_var;
   if (userEmail_var[0] == "u" && !isNaN(Number(userEmail_var[1]))) {
     final_userEmail_var = userEmail_var.slice(1);
   }
-  
+
   const userEmail = ldapUser?.mail || final_userEmail_var //user?.username + "@edu.sde.dk"; 
 
   const loanReceipt = await generateLoanHTML(newLoan.UUID, true);

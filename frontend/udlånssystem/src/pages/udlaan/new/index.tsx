@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import getData from "@/data/getData";
 import useBarcode from "@/hooks/useBarcode";
 import useData from "@/hooks/useData";
+import { getLoanErrorMessage } from "@/services/authErrors";
 
 import axios from "axios";
 import { toast } from "sonner";
@@ -176,7 +177,7 @@ export default function NewLoan({ initPage = 1 }) {
 
         return "Gemt";
       },
-      error: (err) => "Error 500 - " + err.response.data,
+      error: (err) => getLoanErrorMessage(err),
     });
   }
 

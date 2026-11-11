@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 
+import { getLoginErrorMessage } from "@/services/authErrors";
 import { loginViaCredentials, useLoginViaSession } from "@/services/login";
 import {
   SESSION_EXPIRED_MESSAGE,
@@ -32,14 +33,13 @@ export default function LoginPage() {
     e.preventDefault();
 
     loginViaCredentials(username, password).then((res) => {
-      if (res.status == 200 && res.user) {
+      if (res.status === 200 && res.user) {
         setNotice("");
         setCurrentUser(res.user);
+        return;
       }
-      if (res.status === 401)
-        setErrorMessages("Forkert unilogin eller adgangskode");
-      if (res.status === 403) setErrorMessages("Adgang nægtet");
-      if (res.status === 500) setErrorMessages("Server problemer");
+
+      setErrorMessages(getLoginErrorMessage(res.status));
     });
   }
   function resetError() {
